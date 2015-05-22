@@ -10,14 +10,17 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
-void runningServer(int msgid,Client* clients[26], int fieldX, int fieldY);
+void runningServer(int msgid, int fieldX, int fieldY);
 
-int getStartingPosition(Message_handshake* serverHandshake, char* field, int fieldX, int fieldY);
-int makeMove(Client* client, char action, char* field, int fieldX, int fieldY);
+int getStartingPosition(Message_handshake* serverHandshake, int fieldX, int fieldY);
+int makeMove(Client* client, char action, int fieldX, int fieldY);
+
+global Client** clients = (Client**) malloc(sizeof(Client)*26);
+global char* field;
 
 int main()
 {
-	Client* clients [26] = malloc(sizeof(Client)*26);
+
 
 	int msgid;
 
@@ -33,7 +36,7 @@ int main()
 }
 
 
-void runningServer(int msgid,Client* clients[26], int fieldX, int fieldY)
+void runningServer(int msgid, int fieldX, int fieldY)
 {
 	Message_move setup1;
 	Message_handshake setup2;
@@ -43,11 +46,9 @@ void runningServer(int msgid,Client* clients[26], int fieldX, int fieldY)
 
 	int currentClientNumber;
 
-	char* field = malloc(sizeof(char)*(fieldX+2)*(fieldY+2));
+	field = (char*) malloc(sizeof(char)*(fieldX+2)*(fieldY+2));
 
-	int crash = 0;
 	int i = 0;
-	int j = 0;
 
 	for(i=0; i<26; i++)
 	{
@@ -84,7 +85,7 @@ void runningServer(int msgid,Client* clients[26], int fieldX, int fieldY)
 				}
 				else /* if the client just wants to move */
 				{
-					makeMove(clients[currentClientNumber], clientMessage->action, char* field, fieldX, fieldY);
+					makeMove(clients[currentClientNumber], clientMessage->action, fieldX, fieldY);
 
 				}
 
@@ -101,7 +102,7 @@ void runningServer(int msgid,Client* clients[26], int fieldX, int fieldY)
 }
 
 
-void makeMove(Client* client, char action, char* field, int fieldX, int fieldY)
+void makeMove(Client* client, char action, int fieldX, int fieldY)
 {
 	int currentX = client->x;
 	int currentY = client->y;
@@ -131,7 +132,7 @@ void makeMove(Client* client, char action, char* field, int fieldX, int fieldY)
 
 	if(1 >= targetX  || targetX >= fieldX || 1 >= targetY  || targetY >= fieldY)
 	{
-		kill(client);
+		kill(client, fieldX, fieldY);
 	}
 
 	if(field[targetY*fieldX + targetX] == ' ')
@@ -148,18 +149,31 @@ void makeMove(Client* client, char action, char* field, int fieldX, int fieldY)
 		client->x = targetX;
 		client->y = targetY;
 
-		collisionCheck(client);
+		collisionCheck(client, fieldX, fieldY);
 	}
 
 }
 
-void collisionCheck(Client* client)
+void collisionCheck(Client* crashingClient, int fieldX, int fieldY)
 {
 	int i = 0;
 	int x = 0;
 	int y = 0;
 
+	for(i=0; i<26; i++)
+	{
+		if(clients[i]->x == crashingClient->x && clients[i] ==  crashingClient->y)
+		{
+			kill(clients[i]);
+		}
+	}
 
+}
+
+void kill(Client* client, fieldX, fieldY)
+{
+	client->vehicleName = ' ';
+	field[client->y*fieldX + client->x] = client->vehicleName;
 
 
 }
@@ -170,9 +184,9 @@ int getStartingPosition(Message_handshake* serverHandshake, char* field, int fie
 	int x = 0;
 	int y = 0;
 
-	for(x=1; x < (fieldX-1); x++)
+	for(y=1; y < (fieldY-1); y++)
 	{
-		for(y=1; y < (fieldY-1); y++)
+		for(x=1; x < (fieldX-1); x++)
 		{
 			if(field[y*fieldX + x] == ' ')
 			{
