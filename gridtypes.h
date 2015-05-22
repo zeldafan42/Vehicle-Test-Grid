@@ -11,7 +11,7 @@
 #define PIPE_NAME "display.pipe"
 #define KEY 13371337
 #define PERM 0660
-
+#define MAX_SIZE 4096
 
 
 typedef struct
