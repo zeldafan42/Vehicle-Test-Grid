@@ -312,7 +312,7 @@ void makeMove(Client* client, char action, int fieldX, int fieldY)
 		default:	break;
 	}
 
-	if(targetX < 1 || targetX >= fieldX || targetY < 1  || targetY >= fieldY)
+	if(targetX < 1 || targetX >= fieldX-1 || targetY < 1  || targetY >= fieldY-1)
 	{
 		killClient(client, fieldX, fieldY);
 	}
