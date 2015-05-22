@@ -5,10 +5,11 @@
  *      Author: bomwald
  */
 
+#include "gridtypes.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-#include "gridtypes.h"
+
 
 void signalHandler(int sig);
 

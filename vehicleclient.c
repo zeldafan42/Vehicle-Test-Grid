@@ -5,13 +5,17 @@
  *      Author: bomwald
  */
 
+#include "gridtypes.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "gridtypes.h"
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+
+void signalHandler(int sig);
 
 int main(int argc, char* argv[])
 {
@@ -23,6 +27,10 @@ int main(int argc, char* argv[])
 	int typeId;
 	char nextMove;
 
+	signal(SIGINT, signalHandler);
+	signal(SIGHUP, signalHandler);
+	signal(SIGQUIT, signalHandler);
+	signal(SIGTERM, signalHandler);
 
 	if(argc != 2)
 	{
@@ -49,7 +57,7 @@ int main(int argc, char* argv[])
 	move.action = REGISTER;
 	move.pid = pid;
 
-	if(msgget(KEY,PERM) == NULL)
+	if((msgid = msgget(KEY,PERM)) == -1)
 	{
 		fprintf(stderr, "%s: Could not get message queue, maybe server is not yet running?", argv[0]);
 		return -1;
@@ -62,7 +70,7 @@ int main(int argc, char* argv[])
 		 return -1;
    }
 
-	if (msgrcv(msgid,&handshake, sizeof(Message_handshake)-sizeof(long),typeId+26) == -1)
+	if (msgrcv(msgid,&handshake, sizeof(Message_handshake)-sizeof(long),typeId+26, 0) == -1)
 	{
 		fprintf(stderr,"%s: Can't receive message\n",argv[0]);
 		return -1;
@@ -98,3 +106,8 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+void signalHandler(int sig)
+{
+	printf("Vehicle has been eliminated.\n");
+	exit(0);
+}
