@@ -5,6 +5,7 @@
  *      Author: bomwald
  */
 #include <stdio.h>
+#include <gridtypes.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
@@ -13,6 +14,7 @@
 int main()
 {
 	int msgid;
+	Client clients [26];
 
 
 
@@ -20,9 +22,9 @@ int main()
 	/* error handling */
 	}
 
-	while(msgrcv(msgid,&msg,sizeof(msg)-sizeof(long),-25, 0)== -1)
+	while(msgrcv(msgid,&msg,sizeof(msg)-sizeof(long),-25, 0) == -1)
 	{
-
+		msg->
 	}
 
 	return 0;

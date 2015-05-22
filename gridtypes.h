@@ -30,6 +30,12 @@ typedef struct
 } Message_handshake;
 
 
+typedef struct
+{
+	int pid;
+	int x;
+	int y;
+} Client;
 
 
 #endif /* GRIDTYPES_H_ */
