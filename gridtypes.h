@@ -8,6 +8,7 @@
 #ifndef GRIDTYPES_H_
 #define GRIDTYPES_H_
 
+#define _GNU_SOURCE
 #include <sys/types.h>
 #define PIPE_NAME "display.pipe"
 #define KEY 13371337
