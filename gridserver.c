@@ -168,7 +168,7 @@ void runningServer(int msgid, int fieldX, int fieldY)
 				serverHandshake->msgType = (clientMessage->msgType + 26);
 
 				serverHandshake->startX = -2; /* error signal for the client that the vehicle is already on the field */
-				serverHandshake->startY = -2;
+				serverHandshake->startY = -2; /* As only the new one is listening for a handshake the first one will not be affected at all */
 			}
 
 		}
@@ -208,7 +208,7 @@ void makeMove(Client* client, char action, int fieldX, int fieldY)
 		killClient(client, fieldX, fieldY);
 	}
 
-	if(field[targetY*fieldX + targetX] == ' ')
+	if(field[targetY*fieldX + targetX] == ' ') /* is the space where the vehicle is moving to free? */
 	{
 		field[targetY*fieldX + targetX] = client->vehicleName;
 		field[currentY*fieldX + currentX] = ' ';
@@ -217,7 +217,7 @@ void makeMove(Client* client, char action, int fieldX, int fieldY)
 
 		return;
 	}
-	else
+	else /* if there is already a vehicle on the field where this one is moving to */
 	{
 		client->x = targetX;
 		client->y = targetY;
