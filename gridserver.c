@@ -20,7 +20,7 @@ int main()
 	/* error handling */
 	}
 
-	while(msgrcv(msgid,&msg,sizeof(msg)-sizeof(long),-3, 0)== -1)
+	while(msgrcv(msgid,&msg,sizeof(msg)-sizeof(long),-25, 0)== -1)
 	{
 
 	}

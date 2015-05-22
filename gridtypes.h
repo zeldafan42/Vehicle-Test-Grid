@@ -17,17 +17,9 @@
 typedef struct
 {
 	long msgType;
-	char vehicleName;
+	int pid;
 	char action;
 } Message_move;
-
-
-typedef struct
-{
-	long msgType;
-	int pid;
-	char vehicleName;
-} Message_identify;
 
 
 typedef struct
