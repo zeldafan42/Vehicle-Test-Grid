@@ -14,6 +14,8 @@ void runningServer(int msgid, int fieldX, int fieldY);
 
 int getStartingPosition(Message_handshake* serverHandshake, int fieldX, int fieldY);
 int makeMove(Client* client, char action, int fieldX, int fieldY);
+void collisionCheck(Client* crashingClient, int fieldX, int fieldY);
+void killClient(Client* client, fieldX, fieldY);
 
 global Client** clients = (Client**) malloc(sizeof(Client)*26);
 global char* field;
@@ -132,7 +134,7 @@ void makeMove(Client* client, char action, int fieldX, int fieldY)
 
 	if(1 >= targetX  || targetX >= fieldX || 1 >= targetY  || targetY >= fieldY)
 	{
-		kill(client, fieldX, fieldY);
+		killClient(client, fieldX, fieldY);
 	}
 
 	if(field[targetY*fieldX + targetX] == ' ')
@@ -164,18 +166,18 @@ void collisionCheck(Client* crashingClient, int fieldX, int fieldY)
 	{
 		if(clients[i]->x == crashingClient->x && clients[i] ==  crashingClient->y)
 		{
-			kill(clients[i]);
+			killClient(clients[i]);
 		}
 	}
 
 }
 
-void kill(Client* client, fieldX, fieldY)
+void killClient(Client* client, fieldX, fieldY)
 {
 	client->vehicleName = ' ';
 	field[client->y*fieldX + client->x] = client->vehicleName;
 
-
+	kill(client->pid, SIGTERM);
 }
 
 
