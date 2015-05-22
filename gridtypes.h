@@ -39,7 +39,8 @@ typedef struct
 
 typedef struct
 {
-	int pid;
+	pid_t pid;
+	char vehicleName;
 	int x;
 	int y;
 } Client;

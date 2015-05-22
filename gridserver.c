@@ -55,6 +55,7 @@ void runningServer(int msgid, int fieldX, int fieldY)
 			if(clientMessage->action == '0')
 			{
 				serverHandshake->msgType = (clientMessage->msgType + 26);
+
 				if(getStartingPosition(serverHandshake) == -1)
 				{
 					/* send SIGTERM because there is no space */
@@ -71,6 +72,44 @@ void runningServer(int msgid, int fieldX, int fieldY)
 
 void makeMove(Client* client, char action, char* field, int fieldX, int fieldY)
 {
+	int currentX = client->x;
+	int currentY = client->y;
+
+	int targetX = currentX;
+	int targetY = currentY;
+
+	switch(action)
+	{
+		case 'N': 	targetY--;
+					break;
+
+		case 'E': 	targetX++;
+					break;
+
+		case 'S': 	targetY++;
+					break;
+
+		case 'W': 	targetX--;
+					break;
+
+		case 'T':   kill(client);
+					break;
+
+		default:	break;
+	}
+
+	if(1 >= targetX  || targetX >= fieldX || 1 >= targetY  || targetY >= fieldY)
+	{
+		kill(client);
+	}
+
+	if(field[targetY*fieldX + targetX] == ' ')
+	{
+		field[targetY*fieldX + targetX] = client->vehicleName;
+		field[currentY*fieldX + currentX] = ' ';
+		client->x = targetX;
+		client->y = targetY;
+	}
 
 }
 
@@ -91,6 +130,7 @@ int getStartingPosition(Message_handshake* serverHandshake, char* field, int fie
 			}
 		}
 	}
+
 	return -1;
 
 }
