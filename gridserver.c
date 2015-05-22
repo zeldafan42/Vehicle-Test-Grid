@@ -28,6 +28,8 @@ global char* field;
 int main(int argc, char* argv[])
 {
 	int c = 0;
+	int errorX = 0;
+	int errorY = 0;
 	int fieldX = 0;
 	int fieldY = 0;
 
@@ -36,9 +38,27 @@ int main(int argc, char* argv[])
 		switch(c)
 		{
 		case 'x':	fieldX = optarg;
+
+					if(errorX)
+					{
+						fprinft("Use the -x  argument only once!\n");
+						printUsage();
+					}
+
+					errorX = 1;
+
 					break;
 
 		case 'y':	fieldY = optarg;
+
+					if(errorY)
+					{
+						fprinft("Use the -y  argument only once!\n");
+						printUsage();
+					}
+
+					errorY = 1;
+
 					break;
 
 		case '?':	printUsage();
