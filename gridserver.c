@@ -6,10 +6,15 @@
  */
 #include <stdio.h>
 #include "gridtypes.h"
+#include <signal.h>
+#include <stdlib.h>
+#include <getopt.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+
+void signalHandler(int sig);
 void runningServer(int msgid, int fieldX, int fieldY);
 
 int getStartingPosition(Message_handshake* serverHandshake, int fieldX, int fieldY);
@@ -20,21 +25,61 @@ void killClient(Client* client, fieldX, fieldY);
 global Client** clients = (Client**) malloc(sizeof(Client)*26);
 global char* field;
 
-int main()
+int main(int argc, char* argv[])
 {
+	int c = 0;
+	int fieldX = 0;
+	int fieldY = 0;
 
-
-	int msgid;
-
-
-	if( (msgid = msgget(KEY,PERM|IPC_CREAT|IPC_EXCL ))==-1 )
+	while( (c = getopt(argc, argv, "x:y:")) != EOF )
 	{
-	/* error handling */
+		switch(c)
+		{
+		case 'x':	fieldX = optarg;
+					break;
+
+		case 'y':	fieldY = optarg;
+					break;
+
+		case '?':	printUsage();
+					break;
+		}
+
 	}
 
+	if(fieldX<1 || fieldY<1) /* The field should have a height and width which makes sense not just any number */
+	{
+		return 0;
+	}
+	else
+	{
+
+		int msgid;
 
 
-	return 0;
+		if( (msgid = msgget(KEY,PERM|IPC_CREAT|IPC_EXCL ))==-1 )
+		{
+		/* error handling */
+		}
+
+		signal(SIGTERM, signalhandler);
+		signal(SIGINT, signalhandler);
+		signal(SIGQUIT, signalhandler);
+		signal(SIGHUP, signalhandler);
+		signal(SIGKILL, signalhandler); /* As if that would do anything :D */
+
+		runningServer(msgid,fieldX+2,fieldY+2);
+
+		return 0;
+	}
+}
+
+void signalhandler(int sig)
+{
+	free(field);
+	free(clients);
+
+	exit(0);
 }
 
 
@@ -48,7 +93,7 @@ void runningServer(int msgid, int fieldX, int fieldY)
 
 	int currentClientNumber;
 
-	field = (char*) malloc(sizeof(char)*(fieldX+2)*(fieldY+2));
+	field = (char*) malloc(sizeof(char)*fieldX*fieldY);
 
 	int i = 0;
 
