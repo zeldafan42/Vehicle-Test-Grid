@@ -13,7 +13,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
-
+void printUsage();
 void signalHandler(int sig);
 void runningServer(int msgid, int fieldX, int fieldY);
 
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
 
 	if(fieldX<1 || fieldY<1) /* The field should have a height and width which makes sense not just any number */
 	{
-		return 0;
+		printUsage();
 	}
 	else
 	{
@@ -62,16 +62,22 @@ int main(int argc, char* argv[])
 		/* error handling */
 		}
 
-		signal(SIGTERM, signalhandler);
-		signal(SIGINT, signalhandler);
-		signal(SIGQUIT, signalhandler);
-		signal(SIGHUP, signalhandler);
-		signal(SIGKILL, signalhandler); /* As if that would do anything :D */
+		signal(SIGTERM, signalHandler);
+		signal(SIGINT, signalHandler);
+		signal(SIGQUIT, signalHandler);
+		signal(SIGHUP, signalHandler);
+		signal(SIGKILL, signalHandler); /* As if that would do anything :D */
 
 		runningServer(msgid,fieldX+2,fieldY+2);
 
 		return 0;
 	}
+}
+
+void printUsage()
+{
+	fprintf(stderr, "Usage: gridserver -x INT>0 -y INT>0\n");
+	exit(1);
 }
 
 void signalhandler(int sig)
