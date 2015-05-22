@@ -13,12 +13,12 @@
 #define KEY 13371337
 #define PERM 0660
 #define MAX_SIZE 4096
-#define NORTH 'N';
-#define EAST 'E';
-#define SOUTH 'S';
-#define WEST 'W';
-#define TERMINATE 'T';
-#define REGISTER '0';
+#define NORTH 'N'
+#define EAST 'E'
+#define SOUTH 'S'
+#define WEST 'W'
+#define TERMINATE 'T'
+#define REGISTER '0'
 
 
 typedef struct

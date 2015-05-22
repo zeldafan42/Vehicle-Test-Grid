@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <gridtypes.h>
+#include "gridtypes.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
 	Message_move move;
 	pid_t pid = getpid();
 	int typeId;
+	char nextMove;
 
 
 	if(argc != 2)
@@ -31,26 +32,26 @@ int main(int argc, char* argv[])
 
 	if(strlen(argv[1]) != 1)
 	{
-		fprintf(stderr, "Only one symbol allowed");
+		fprintf(stderr, "%s: Only one symbol allowed", argv[0]);
 		return -1;
 	}
 
 	if(argv[1][0] > 'Z' || argv[1][0] <'A')
 	{
-		fprintf(stderr, "Only A-Z allowed");
+		fprintf(stderr, "%s: Only A-Z allowed", argv[0]);
 		return -1;
 	}
 
 	symbol = argv[1][0];
 	typeId = symbol - 'A';
 
-	move->msgType = typeId;
-	move->action = REGISTER;
-	move->pid = pid;
+	move.msgType = typeId;
+	move.action = REGISTER;
+	move.pid = pid;
 
 	if(msgget(KEY,PERM) == NULL)
 	{
-		fprintf(stderr, "Could not get message queue, maybe server is not yet running?");
+		fprintf(stderr, "%s: Could not get message queue, maybe server is not yet running?", argv[0]);
 		return -1;
 	}
 
@@ -61,9 +62,38 @@ int main(int argc, char* argv[])
 		 return -1;
    }
 
-	if (msgrcv())
+	if (msgrcv(msgid,&handshake, sizeof(Message_handshake)-sizeof(long),typeId+26) == -1)
+	{
+		fprintf(stderr,"%s: Can't receive message\n",argv[0]);
+		return -1;
+	}
 
+	if(handshake.startX<0)
+	{
+		fprintf(stderr,"%s: Registration FAILED\n",argv[0]);
+		return -1;
+	}
+	else
+	{
+		printf("Registration OK. Start position: %d, %d",handshake.startX,handshake.startY);
+	}
 
+	printf("Enter Move: ");
+
+	while(1)
+	{
+		nextMove = getchar();
+		if((nextMove == NORTH) || (nextMove == EAST) || (nextMove == SOUTH) || (nextMove == WEST) || (nextMove == TERMINATE))
+		{
+			move.action = nextMove;
+			if (msgsnd(msgid,&move,sizeof(Message_move)-sizeof(long), 0) == -1)
+			{
+				 /* error handling */
+				 fprintf(stderr,"%s: Can't send message\n",argv[0]);
+				 return -1;
+			}
+		}
+	}
 
 	return 0;
 }
