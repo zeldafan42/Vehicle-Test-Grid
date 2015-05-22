@@ -5,20 +5,21 @@
  *      Author: bomwald
  */
 #include <stdio.h>
-#include <gridtypes.h>
+#include "gridtypes.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+void runningServer(int msgid,Client* clients[26], int fieldX, int fieldY);
 
 int getStartingPosition(Message_handshake* serverHandshake, char* field, int fieldX, int fieldY);
-void makeMove(Client* client, char action, char* field, int fieldX, int fieldY);
+int makeMove(Client* client, char action, char* field, int fieldX, int fieldY);
 
 int main()
 {
+	Client* clients [26] = malloc(sizeof(Client)*26);
+
 	int msgid;
-
-
 
 
 	if( (msgid = msgget(KEY,PERM|IPC_CREAT|IPC_EXCL ))==-1 )
@@ -32,7 +33,7 @@ int main()
 }
 
 
-void runningServer(int msgid, int fieldX, int fieldY)
+void runningServer(int msgid,Client* clients[26], int fieldX, int fieldY)
 {
 	Message_move setup1;
 	Message_handshake setup2;
@@ -41,29 +42,59 @@ void runningServer(int msgid, int fieldX, int fieldY)
 	Message_handshake* serverHandshake = &setup2;
 
 	int currentClientNumber;
-	Client clients [26];
 
 	char* field = malloc(sizeof(char)*(fieldX+2)*(fieldY+2));
+
+	int crash = 0;
+	int i = 0;
+	int j = 0;
+
+	for(i=0; i<26; i++)
+	{
+		clients[i]->vehicleName = ' ';
+	}
+
 
 
 
 	while(msgrcv(msgid,&clientMessage,sizeof(Message_move)-sizeof(long),-25, 0) == -1)
 		{
 			currentClientNumber = clientMessage->msgType;
-			clients[currentClientNumber]->pid = clientMessage->pid;
 
-			if(clientMessage->action == '0')
+			if(clients[currentClientNumber]->vehicleName == ' ')
+			{
+				clients[currentClientNumber]->pid = clientMessage->pid;
+
+
+				if(clientMessage->action == '0') /*if the client is requesting a starting position */
+				{
+					serverHandshake->msgType = (clientMessage->msgType + 26);
+
+					if(getStartingPosition(serverHandshake) == -1) /* if the field is full */
+					{
+						serverHandshake->startX = -1; /* error signal for the client that the field is full */
+						serverHandshake->startY = -1;
+
+						msgsnd(msgid, serverHandshake, sizeof(Message_handshake)-sizeof(long), serverHandshake->msgType, PERM);
+					}
+					else  /* if there is an available starting position */
+					{
+						msgsnd(msgid, serverHandshake, sizeof(Message_handshake)-sizeof(long), serverHandshake->msgType, PERM);
+					}
+				}
+				else /* if the client just wants to move */
+				{
+					makeMove(clients[currentClientNumber], clientMessage->action, char* field, fieldX, fieldY);
+
+				}
+
+			}
+			else /* if the vehicle is already on the field */
 			{
 				serverHandshake->msgType = (clientMessage->msgType + 26);
 
-				if(getStartingPosition(serverHandshake) == -1)
-				{
-					/* send SIGTERM because there is no space */
-				}
-				else
-				{
-					msgsnd(msgid, serverHandshake, sizeof(Message_handshake)-sizeof(long), serverHandshake->msgType, PERM);
-				}
+				serverHandshake->startX = -2; /* error signal for the client that the vehicle is already on the field */
+				serverHandshake->startY = -2;
 			}
 
 		}
@@ -109,9 +140,30 @@ void makeMove(Client* client, char action, char* field, int fieldX, int fieldY)
 		field[currentY*fieldX + currentX] = ' ';
 		client->x = targetX;
 		client->y = targetY;
+
+		return;
+	}
+	else
+	{
+		client->x = targetX;
+		client->y = targetY;
+
+		collisionCheck(client);
 	}
 
 }
+
+void collisionCheck(Client* client)
+{
+	int i = 0;
+	int x = 0;
+	int y = 0;
+
+
+
+
+}
+
 
 int getStartingPosition(Message_handshake* serverHandshake, char* field, int fieldX, int fieldY)
 {
