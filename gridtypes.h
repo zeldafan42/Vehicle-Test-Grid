@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #define PIPE_NAME "display.pipe"
 #define KEY 13371337
-#define PERM 0660
+#define PERM 0777
 #define MAX_SIZE 4096
 #define NORTH 'N'
 #define EAST 'E'
@@ -24,7 +24,7 @@
 
 typedef struct
 {
-	long msgType;
+	long mType;
 	pid_t pid;
 	char action;
 } Message_move;
@@ -32,7 +32,7 @@ typedef struct
 
 typedef struct
 {
-	long msgType;
+	long mType;
 	int startX;
 	int startY;
 } Message_handshake;

@@ -23,6 +23,8 @@ int main(int argc, char* argv[])
 	int msgid;
 	Message_handshake handshake;
 	Message_move move;
+	memset(&move,0,sizeof(move));
+	size_t moveSize = sizeof(Message_move)-sizeof(long);
 	pid_t pid = getpid();
 	int typeId;
 	char nextMove;
@@ -34,36 +36,38 @@ int main(int argc, char* argv[])
 
 	if(argc != 2)
 	{
-		fprintf(stderr, "Usage: %s SYMBOL(A-Z)", argv[0]);
+		fprintf(stderr, "Usage: %s SYMBOL(A-Z)\n", argv[0]);
 		return -1;
 	}
 
 	if(strlen(argv[1]) != 1)
 	{
-		fprintf(stderr, "%s: Only one symbol allowed", argv[0]);
+		fprintf(stderr, "%s: Only one symbol allowed\n", argv[0]);
 		return -1;
 	}
 
 	if(argv[1][0] > 'Z' || argv[1][0] <'A')
 	{
-		fprintf(stderr, "%s: Only A-Z allowed", argv[0]);
+		fprintf(stderr, "%s: Only A-Z allowed\n", argv[0]);
 		return -1;
 	}
 
 	symbol = argv[1][0];
-	typeId = symbol - 'A';
+	typeId = symbol - 'A' + 1;
 
-	move.msgType = typeId;
+	move.mType = typeId;
 	move.action = REGISTER;
 	move.pid = pid;
 
 	if((msgid = msgget(KEY,PERM)) == -1)
 	{
-		fprintf(stderr, "%s: Could not get message queue, maybe server is not yet running?", argv[0]);
+		fprintf(stderr, "%s: Could not get message queue, maybe server is not yet running?\n", argv[0]);
 		return -1;
 	}
 
-	if (msgsnd(msgid,&move,sizeof(Message_move)-sizeof(long), 0) == -1)
+	//printf("%d,%ld,%c,%d\n", msgid,move.mType,move.action,move.pid);
+
+	if (msgsnd(msgid,&move,moveSize, 0) == -1)
    {
 		 /* error handling */
 		 fprintf(stderr,"%s: Can't send message\n",argv[0]);
@@ -83,7 +87,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		printf("Registration OK. Start position: %d, %d",handshake.startX,handshake.startY);
+		printf("Registration OK. Start position: %d, %d\n",handshake.startX,handshake.startY);
 	}
 
 	printf("Enter Move: ");
@@ -94,12 +98,13 @@ int main(int argc, char* argv[])
 		if((nextMove == NORTH) || (nextMove == EAST) || (nextMove == SOUTH) || (nextMove == WEST) || (nextMove == TERMINATE))
 		{
 			move.action = nextMove;
-			if (msgsnd(msgid,&move,sizeof(Message_move)-sizeof(long), 0) == -1)
+			if (msgsnd(msgid,&move,moveSize, 0) == -1)
 			{
 				 /* error handling */
 				 fprintf(stderr,"%s: Can't send message\n",argv[0]);
 				 return -1;
 			}
+			printf("Enter Move: ");
 		}
 	}
 

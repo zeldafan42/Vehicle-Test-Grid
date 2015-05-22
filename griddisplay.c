@@ -13,9 +13,10 @@
 
 void signalHandler(int sig);
 
+FILE * fp;
+
 int main(int argc, char* argv[])
 {
-	FILE * fp;
 	char msgBuf[MAX_SIZE];
 	char * msg;
 
@@ -31,6 +32,10 @@ int main(int argc, char* argv[])
 	while(1)
 	{
 		msg = fgets(msgBuf, MAX_SIZE-1, fp);
+		if(msg == NULL)
+		{
+			signalHandler(SIGPIPE);
+		}
 		printf("%s",msg);
 	}
 
@@ -39,5 +44,12 @@ int main(int argc, char* argv[])
 
 void signalHandler(int sig)
 {
+	if(fp != NULL)
+	{
+		if(fclose(fp) == EOF)
+		{
+			fprintf(stderr, "griddisplay: Could not close pipe.\n");
+		}
+	}
 	exit(0);
 }
