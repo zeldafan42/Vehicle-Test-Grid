@@ -11,10 +11,18 @@
 #include <sys/msg.h>
 
 
+void getStartingPosition(Message_handshake* serverHandshake);
+void makeMove(Client* client, char action);
+
 int main()
 {
 	int msgid;
+	int currentClientNumber;
 	Client clients [26];
+
+
+	Message_move clientMessage;
+	Message_handshake serverHandshake;
 
 
 
@@ -22,10 +30,21 @@ int main()
 	/* error handling */
 	}
 
-	while(msgrcv(msgid,&msg,sizeof(msg)-sizeof(long),-25, 0) == -1)
+	while(msgrcv(msgid,&clientMessage,sizeof(msg)-sizeof(long),-25, 0) == -1)
 	{
-		msg->
+		currentClientNumber = clientMessage->msgType;
+		clients[currentClientNumber]->pid = clientMessage->pid;
+
+		if(clientMessage->action == '0')
+		{
+			serverHandshake->msgType = (clientMessage->msgType + 26);
+			getStartingPosition(&serverHandshake);
+			msgsnd(msgid,)
+		}
+
 	}
 
 	return 0;
 }
+
+
