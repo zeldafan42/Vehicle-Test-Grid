@@ -13,4 +13,31 @@
 #define PERM 0660
 
 
+
+typedef struct
+{
+	long msgType;
+	char vehicleName;
+	char action;
+} Message_move;
+
+
+typedef struct
+{
+	long msgType;
+	int pid;
+	char vehicleName;
+} Message_identify;
+
+
+typedef struct
+{
+	long msgType;
+	int startX;
+	int startY;
+} Message_handshake;
+
+
+
+
 #endif /* GRIDTYPES_H_ */

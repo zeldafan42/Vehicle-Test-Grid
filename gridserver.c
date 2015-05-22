@@ -8,15 +8,21 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
-#define KEY 13371337
-#define PERM 0660
+
 
 int main()
 {
 	int msgid;
 
+
+
 	if( (msgid = msgget(KEY,PERM|IPC_CREAT|IPC_EXCL ))==-1 ){
 	/* error handling */
+	}
+
+	while(msgrcv(msgid,&msg,sizeof(msg)-sizeof(long),-3, 0)== -1)
+	{
+
 	}
 
 	return 0;
